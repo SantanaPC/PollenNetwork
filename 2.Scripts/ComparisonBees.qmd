@@ -1,0 +1,170 @@
+---
+title: "Pollen Network"
+author: "Pamela Santana"
+format: html
+editor: visual
+---
+
+## Visualization of a pollen network
+
+```{r import data and verify if there is a difference in the number of interactions for bee species}
+
+library("bipartite");library("purrr"); library("viridis")
+library("kableExtra");library(dplyr);library(igraph);
+library("ggplot2");library("tidyverse"); library(tidyr)
+library(DHARMa);library("pheatmap");library(vegan)
+
+pollen_net <- read.csv("1.Data/Network_data.csv", header = T, sep="," , row.names = 1)
+net_info <- read_csv("1.Data/Species_data.csv")
+pool_net <- read.csv("1.Data/Network_pooled_data.csv", header = T, sep="," )
+
+plantInt<-net_info|> filter(resource==1)|> 
+  filter(total_interactions>=1) 
+
+ggplot(plantInt)+
+  geom_histogram(aes(x=total_interactions)) +
+  facet_wrap(~cons_status)+
+  labs(x="Total Pollen Grains", y="Frequency")+theme_bw()
+
+pollen_bi<-ifelse(pollen_net>0, 1, 0)
+hives<-colnames(pollen_bi)
+pollen<-colSums(pollen_bi)
+int<-cbind(hives, pollen)
+int<-as.data.frame(int)
+int$hives<-as.factor(int$hives)
+int$pollen<-as.numeric(int$pollen)
+#hist(pollen)
+bee<-separate(int, hives, into=c("bee_genus", "bee_epit", "hive"), sep="_")
+meanSpInt<-aggregate(bee$pollen, by=list(bee$bee_genus), FUN=mean)
+meanSpInt$x<-round(meanSpInt$x, 2)
+
+m1<-glm(pollen~bee_genus, family= poisson, data=bee)
+m2<-lme4::glmer(pollen~bee_genus+(1|hives), family= poisson, data=bee)
+plot(DHARMa::simulateResiduals(m1))
+m<-glm(pollen~1, family= poisson, data=bee)
+bbmle::AICtab(m, m1, m2, weights=TRUE)
+
+ggplot(bee, aes(x=bee_genus, y=pollen)) +  geom_violin(aes(fill=bee_genus), alpha=0.2)+ geom_boxplot(width=0.1, alpha=0.3) +
+scale_fill_manual(values=c("#714925", "#CF6B13","#F69F22"))+geom_point(aes(color=hive), size=3) +  scale_color_viridis(discrete = TRUE)+
+labs(x="Bee species", y="Number of interactions with plant species")+theme_bw()
+
+```
+
+```{r checking interaction with native and non-native species}
+
+consStatus<-left_join(net_info[,c(2,6,8)], pool_net, by = "species")
+
+consStatus<-consStatus |>
+  pivot_longer(cols = -c(cons_status, species, flowers_1km_radius), names_to = 'BeeSpecies', values_to = 'PollenGrains')
+  
+consStatus$BeeSpecies= as.factor(consStatus$BeeSpecies)
+levels(consStatus$BeeSpecies) 
+consStatus$PollenGrains<-as.numeric(consStatus$PollenGrains)
+
+meanConsInt<-aggregate(consStatus$PollenGrains, by=list(consStatus$BeeSpecies, consStatus$cons_status), FUN=mean, na.rm=TRUE)
+
+consStatusInt<- filter(consStatus, PollenGrains>0)
+
+consStatus$cons_status<-factor(consStatus$cons_status, levels=c("non-native","native"))
+
+ggplot(na.omit(consStatus)) + 
+geom_point(aes(y=log(PollenGrains), x=cons_status, colour=cons_status))+
+geom_boxplot(aes(y=log(PollenGrains), x=cons_status), width=0.2, alpha=0.3) + 
+scale_color_manual(values=c("#d7191c","#eec04b")) +facet_wrap(~BeeSpecies)+
+labs(x="Conservation Status of Interacting Plant Species", y="Number of Pollen grains (Log)")+theme_bw()
+
+ggplot(na.omit(consStatus)) + 
+geom_boxplot(aes(y=PollenGrains, x=cons_status, fill=cons_status), width=0.3, alpha=0.3) + facet_wrap(~BeeSpecies)+scale_fill_manual(values=c("#d7191c","#eec04b")) +
+labs(x="Conservation Status of Interacting Plant Species", y="Number of Pollen grains ")+theme_bw()
+
+library(MASS)
+con<-glm.nb(PollenGrains~BeeSpecies*cons_status+offset(flowers_1km_radius), data=consStatus)
+con1<-glm.nb(PollenGrains~BeeSpecies+offset(flowers_1km_radius), data=consStatus)
+con2<-glm.nb(PollenGrains~cons_status+offset(flowers_1km_radius), data=consStatus)
+con3<-glm.nb(PollenGrains~BeeSpecies+cons_status+offset(flowers_1km_radius), data=consStatus)
+con4<-glm.nb(PollenGrains~1+offset(flowers_1km_radius), data=consStatus)
+plot(DHARMa::simulateResiduals(con1))
+
+bbmle::AICtab(con, con1, con2, con3, con4, weights=TRUE)
+MuMIn::model.sel(con, con1, con2, con3, con4, rank="AICc")
+
+anova(con1, test="Chi")
+summary(con1)
+
+library(emmeans)
+
+bee<-emmeans(con1, ~BeeSpecies)
+plot(confint(bee, level=0.95))
+
+library(RVAideMemoire)
+beenat<-back.emmeans(bee, transform = "logit", base = exp(1),add = 0,  decreasing = TRUE)
+ggplot()+
+  geom_errorbar(beenat, mapping=aes(x=beenat[,1], ymin=SE.inf, ymax=SE.sup), width=.2, size=0.5, color="black")+ geom_point(data=beenat, mapping=aes(x=beenat[,1], y=EMMean), size=2.5, shape=19, fill=c("black"), color="black")+theme_bw()+theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+```
+
+Here is the bipartite graph:
+
+![](bipartite_graph.png)
+
+```{r}
+pollen_net<-as.matrix(pollen_net)
+heatmap(t(pollen_net), Rowv=NA, Colv=NA, col=colorRampPalette(c("#f5f5f5","#eec04b", "#CF6B13","#F69F22"))(100), scale="none")
+
+pheatmap(t(pollen_net), Rowv=NA, Colv=NA, col=colorRampPalette(c("#f5f5f5","#eec04b", "#CF6B13","#F69F22"))(100), scale="none", cutree_rows = 4)
+
+```
+
+# NMDS
+
+```{r NMDS analysis}
+Bees <-read.table("1.Data/Bees_PCA_test.csv",header=T, sep=",")
+
+data_matrix <- Bees[, 4:52]
+# Scale the data
+scaled_data <- scale(data_matrix)
+
+# Calculate Bray-Curtis dissimilarity
+dissimilarity_matrix <- vegdist(data_matrix, method = "bray")
+
+# Perform NMDS
+nmds_result <- metaMDS(dissimilarity_matrix, k = 2, trymax = 100)
+
+# Print the results
+print(nmds_result)
+
+# Stress value
+stress_value <- nmds_result$stress
+print(paste("Stress:", stress_value))
+
+nmds_points <- as.data.frame(nmds_result$points)
+
+# Add a column for sample labels
+nmds_points$Species <- Bees$Sp_code
+nmds_points$Species <-as.factor(nmds_points$Species)
+nmds_points$Hive <- Bees$Hive
+
+```
+
+```{r NMDS}
+
+# Convex hull function
+find_hull <- function(df) df[chull(df$MDS1, df$MDS2), ]
+
+
+# Apply convex hull function to each group
+hulls <- nmds_points |>
+  group_by(Species) |>
+  do(find_hull(.))
+
+
+# Plot with convex hulls
+ggplot(data = nmds_points, aes(x = MDS1, y = MDS2)) +
+  geom_polygon(data=hulls,aes(fill=Species, group=Species), alpha=0.30)+
+  geom_point(size = 2, aes(colour = Species,), show.legend = T) +
+  geom_text(size = 3,aes(label = Hive), vjust = 1.5, hjust = 0.5) +
+  scale_fill_manual(labels= c("Nannotrigona testaceicornis",	"Paratrigona opacavalues", "Tetragonisca angustula"), values=c("Nann_test" = "#714925", "Para_opa"="#CF6B13","Tet_ang"= "#F69F22"))+
+  scale_colour_manual(labels= c("Nannotrigona testaceicornis",	"Paratrigona opacavalues", "Tetragonisca angustula"), values=c("Nann_test" = "#714925", "Para_opa"="#CF6B13","Tet_ang"= "#F69F22"))+
+  labs(title = "NMDS Plot", x = "NMDS1", y = "NMDS2") +
+  theme_bw()
+```

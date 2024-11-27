@@ -1,0 +1,63 @@
+﻿family,species,color,hive,sp_code,cons_status,plant_life_form,flowers_1km_radius,resource,group,total_interactions
+Amaranthaceae,Amaranthaceae,P,,Amaranthaceae,native,Herb ,,1,,1
+Apiaceae,Apiaceae,P,,Api,non-native,Bush ,1,1,,182
+Aquifoliacae,Ilex_sp,P,,Ile_sp,native,Bush ,0,1,,8
+Asteraceae,Smallanthus_connatus_,P,,Sma_con,native,Herb ,1,1,,221
+Asteraceae,Asteraceae,P,,Asteraceae,,Herb,,1,,41
+Asteraceae,Tagetes_erecta,P,,Tag_ere,native,Herb ,1,1,,26
+Asteraceae,Emilia_fosbergii,P,,Emi_fos,native,Herb ,1,1,,19
+Asteraceae,Galinsoga_parvifolia_,P,,Gal_par,native,Herb ,1,1,,15
+Asteraceae,Taraxacum_sp,P,,Tar_sp,non-native,Herb ,0,1,,6
+Asteraceae,Senecio_sp,P,,Sen_sp,native,Herb ,0,1,,2
+Asteraceae,Acmella_sp,P,,Acm_sp,native,Herb ,1,1,,1
+Asteraceae,Ageratum_sp,P,,Age_sp,native,Herb ,0,1,,1
+Balsaminaceae,Impatiens_walleriana,P,,Imp_wal,non-native,Herb ,1,1,,3
+Campanulaceae,Campanulaceae,P,,Campanulaceae,,Herb ,,1,,2
+Cannabaceae,Lozanella_sp2,P,,Loz_sp2,native,Bush ,1,1,,33
+Cannabaceae,Lozanella_sp1,P,,Loz_sp1,native,Tree,1,1,,4
+Chloranthaceae,Hedyosmum_Citrus,P,,Hed_Cit,native,Tree,0,1,,151
+Costaceae ,Costus_sp,P,,Cos_sp,native,Bush ,1,1,,3
+Ericaceae,Gaulteria_glomerata,P,,Gau_glo,native,Bush ,1,1,,1
+Fabaceae,Senna_obtusifolia,P,,Sen_obt,native,Tree,0,1,,67
+Fabaceae,Clitoria_sp,P,,Cli_sp,non-native,Bush ,1,1,,3
+Fabaceae ,Rhynchosia_minima,P,,Rhy_min,non-native,Herb ,0,1,,445
+Fabaceae ,Arachis_sp,P,,Ara_sp,non-native,Herb ,1,1,,6
+Grossulaceae,Ribes_bolivianum,P,,Rib_bol,native,Tree,0,1,,1
+Lamiaceae,Plectranthus_scutellarioides,P,,Ple_scu,native,Bush ,1,1,,1
+Loranthaceae,Ligaria_sp,P,,Lig_sp,non-native,Climber,0,1,,2
+Malpighiaceae,Banisteriopsis_gesneriaceae,P,,Ban_ges,native,Bush ,0,1,,28
+Melastomataceae,Leandra_sp,P,,Lea_sp,native,Bush ,1,1,,1420
+Melastomataceae,Miconia_sp,P,,Mic_sp,native,Bush ,1,1,,272
+Melastomataceae,Tibouchina_Bellucia,P,,Tib_Bell,native,Bush ,1,1,,87
+Myrsinoideae,Myrsine_sp,P,,Myr_sp,native,Tree,0,1,,55
+Myrtaceae,Myrcianthes_sp,P,,Myrc_sp,native,Tree,0,1,,154
+Myrtaceae,Myrtaceae_1,P,,Myrtaceae_1,native,Tree,,1,,141
+Myrtaceae,Myrtaceae_2,P,,Myrtaceae_2,,Bush ,,1,,24
+Myrtaceae,Myrcia_multiflora,P,,Myr_mul,native,Tree,0,1,,14
+Myrtaceae,Eucalipto_sp,P,,Euc_sp,non-native,Tree,1,1,,5
+Myrtaceae,Myrcia_selloi,P,,Myr_sel,native,Tree,0,1,,5
+Oxalidaceae,Oxalis_triporado,P,,Oxa_tri,native,Herb ,1,1,,298
+Papaveraceae,Bocconia_sp,P,,Boc_sp,native,Bush ,1,1,,13
+Piperaceae,Piper_sp,P,,Pip_sp,native,Bush ,1,1,,254
+Poaceae ,Poaceae,P,,Poaceae,,Herb ,,1,,5
+Rosaceae,Eriobotrya_japonica_,P,,Eri_ja,non-native,Tree,0,1,,5
+Rubiaceae,Penna_sp,P,,Pen_sp,native,Herb ,0,1,,9
+Rubiaceae ,Palicourea_sp,P,,Pal_sp,native,Bush ,0,1,,23
+Rubiaceae/Labiada,Galianthe_subyungensis,P,,Gal_sub,native,Tree,0,1,,5
+Rutaceae,Citrus_sp,P,,Cit_sp,non-native,Tree ,1,1,,43
+Solanaceae,Solanaceae,P,,Solanaceae,native,Bush ,,1,,74
+Solanaceae ,Solanaceae ,P,,Solanaceae ,,Bush ,,1,,14
+Verbenaceae,Lantana_camara,P,,Lan_camar,non-native,Bush ,1,1,,3
+Apidae,Nannotrigona_testaceicornis,N,1,Nan_tes_1,N,,,0,N_testaceicornis,334
+Apidae,Nannotrigona_testaceicornis,N,2,Nan_tes_2,N,,,0,N_testaceicornis,326
+Apidae,Nannotrigona_testaceicornis,N,3,Nan_tes_3,N,,,0,N_testaceicornis,16
+Apidae,Paratrigona_opaca,PO,1,Par_opa_1,PO,,,0,P_opaca,322
+Apidae,Paratrigona_opaca,PO,3,Par_opa_3,PO,,,0,P_opaca,318
+Apidae,Paratrigona_opaca,PO,2,Par_opa_2,PO,,,0,P_opaca,293
+Apidae,Tetragonisca_angustula,T,1,Tet_ang_1,T,,,0,T_angustula,500
+Apidae,Tetragonisca_angustula,T,3,Tet_ang_3,T,,,0,T_angustula,326
+Apidae,Tetragonisca_angustula,T,2,Tet_ang_2,T,,,0,T_angustula,315
+Apidae,Tetragonisca_angustula,T,4,Tet_ang_4,T,,,0,T_angustula,313
+Apidae,Tetragonisca_angustula,T,7,Tet_ang_7,T,,,0,T_angustula,311
+Apidae,Tetragonisca_angustula,T,5,Tet_ang_5,T,,,0,T_angustula,291
+Apidae,Tetragonisca_angustula,T,6,Tet_ang_6,T,,,0,T_angustula,263
