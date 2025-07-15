@@ -1,10 +1,9 @@
-# Foraging Patterns of Rescued Stingless Bees in the Tropical Andes
+**"Distinct intra- and interspecific foraging patterns of stingless bee species as a conservation tool"**
 
-This repository contains the data and analysis scripts associated with the paper:
-
-**"Distinct intra- and interspecific foraging patterns of stingless bee species as a conservation tool"**  
 *Lozada-Gobilard, S., Santana, P. C., Maidana-Tuco, Y., Gutierrez, E. O., & Ortuño, T.*  
 _Accepted in Biotropica, 2025_
+
+This repository contains the data and analysis scripts used to investigate the foraging patterns of rescued stingless bees in the tropical Andes:
 
 ---
 
