@@ -1,32 +1,33 @@
 ---
 title: "Pollen Network"
-author: "Pamela Santana"
+author: "Pamela Santana; Sissi Lozada-Gobilard; Yamil Maidana-Tuco; Elvis Otmar Gutierrez; Teresa Ortuño"
 format: html
 editor: visual
 ---
 
-## Visualization of a pollen network
+## Analysis using pollen from honey of three rescued stingless bee species (Tetragonisca angustula, Nannotrigona testaceicornis, and Paratrigona opaca) in Bolivia's tropical Andes to  investigate foraging behavior and niche overlap in the context of plant-pollinator interactions network. 
 
 ```{r import data and verify if there is a difference in the number of interactions for bee species}
-
+#loading all packages
 library("bipartite");library("purrr"); library("viridis")
 library("kableExtra");library(dplyr);library(igraph);
 library("ggplot2");library("tidyverse"); library(tidyr)
-library(DHARMa);library("pheatmap");library(vegan)
+library(DHARMa);library("pheatmap");library(vegan);
+library(emmeans);library(MASS);library(RVAideMemoire)
 
-pollen_net <- read.csv("1.Data/Network_data.csv", header = T, sep="," , row.names = 1)
-net_info <- read_csv("1.Data/Species_data.csv")
-pool_net <- read.csv("1.Data/Network_pooled_data.csv", header = T, sep="," )
+pollen_net <- read.csv("PollenNetwork/1.Data/Network_data.csv", header = T, sep="," , row.names = 1) #loading data on pollen network
+net_info <- read_csv("PollenNetwork/1.Data/Species_data.csv") #loading info from the species
+pool_net <- read.csv("PollenNetwork/1.Data/Network_pooled_data.csv", header = T, sep="," ) #loading network with data pooled by species
 
-plantInt<-net_info|> filter(resource==1)|> 
-  filter(total_interactions>=1) 
+plantInt<-net_info|> filter(resource==1)|> #separating plants from bees
+  filter(total_interactions>=1) #filtering plants with at least one interaction
 
-ggplot(plantInt)+
+ggplot(plantInt)+ #inspecting data
   geom_histogram(aes(x=total_interactions)) +
   facet_wrap(~cons_status)+
   labs(x="Total Pollen Grains", y="Frequency")+theme_bw()
 
-pollen_bi<-ifelse(pollen_net>0, 1, 0)
+pollen_bi<-ifelse(pollen_net>0, 1, 0) #transforming the network into a binary matrix
 hives<-colnames(pollen_bi)
 pollen<-colSums(pollen_bi)
 int<-cbind(hives, pollen)
@@ -35,24 +36,34 @@ int$hives<-as.factor(int$hives)
 int$pollen<-as.numeric(int$pollen)
 #hist(pollen)
 bee<-separate(int, hives, into=c("bee_genus", "bee_epit", "hive"), sep="_")
+#calculate the number of interactions for each bee species
 meanSpInt<-aggregate(bee$pollen, by=list(bee$bee_genus), FUN=mean)
 meanSpInt$x<-round(meanSpInt$x, 2)
 
+#testing if there is a difference in the number of interactions for bee species
+m0<-lme4::glmer(pollen~1+(1|hives), family= poisson, data=bee)
+m<-glm(pollen~1, family= poisson, data=bee)#null model
 m1<-glm(pollen~bee_genus, family= poisson, data=bee)
 m2<-lme4::glmer(pollen~bee_genus+(1|hives), family= poisson, data=bee)
-plot(DHARMa::simulateResiduals(m1))
-m<-glm(pollen~1, family= poisson, data=bee)
+#plot(DHARMa::simulateResiduals(m1))
 bbmle::AICtab(m, m1, m2, weights=TRUE)
+MuMIn::model.sel(m, m1, m2, rank="AICc")
 
-ggplot(bee, aes(x=bee_genus, y=pollen)) +  geom_violin(aes(fill=bee_genus), alpha=0.2)+ geom_boxplot(width=0.1, alpha=0.3) +
-scale_fill_manual(values=c("#714925", "#CF6B13","#F69F22"))+geom_point(aes(color=hive), size=3) +  scale_color_viridis(discrete = TRUE)+
-labs(x="Bee species", y="Number of interactions with plant species")+theme_bw()
+#Number of interactions for each bee species
+ggplot(bee, aes(x=bee_genus, y=pollen)) +  
+  geom_violin(aes(fill=bee_genus), alpha=0.2)+ 
+  geom_boxplot(width=0.1, alpha=0.3) +
+  scale_fill_manual(values=c("#714925", "#CF6B13","#F69F22"))+
+  geom_point(aes(color=hive), size=3) +  
+  scale_color_viridis(discrete = TRUE)+
+  labs(x="Bee species", y="Number of interactions with plant species")+
+  theme_bw()
 
 ```
 
 ```{r checking interaction with native and non-native species}
 
-consStatus<-left_join(net_info[,c(2,6,8)], pool_net, by = "species")
+consStatus<-left_join(net_info[,c(2,6,8)], pool_net, by = "species")#adding the information about conservation status into the network data
 
 consStatus<-consStatus |>
   pivot_longer(cols = -c(cons_status, species, flowers_1km_radius), names_to = 'BeeSpecies', values_to = 'PollenGrains')
@@ -67,17 +78,21 @@ consStatusInt<- filter(consStatus, PollenGrains>0)
 
 consStatus$cons_status<-factor(consStatus$cons_status, levels=c("non-native","native"))
 
+#visualization fo the conservation status of interacting plant species and each bee species
 ggplot(na.omit(consStatus)) + 
-geom_point(aes(y=log(PollenGrains), x=cons_status, colour=cons_status))+
-geom_boxplot(aes(y=log(PollenGrains), x=cons_status), width=0.2, alpha=0.3) + 
-scale_color_manual(values=c("#d7191c","#eec04b")) +facet_wrap(~BeeSpecies)+
-labs(x="Conservation Status of Interacting Plant Species", y="Number of Pollen grains (Log)")+theme_bw()
+  geom_point(aes(y=log(PollenGrains), x=cons_status, colour=cons_status))+
+  geom_boxplot(aes(y=log(PollenGrains), x=cons_status), width=0.2, alpha=0.3) + 
+  scale_color_manual(values=c("#d7191c","#eec04b")) +
+  facet_wrap(~BeeSpecies)+
+  labs(x="Conservation Status of Interacting Plant Species", y="Number of Pollen grains (Log)")+
+  theme_bw()
 
+#without logging the interactions
 ggplot(na.omit(consStatus)) + 
 geom_boxplot(aes(y=PollenGrains, x=cons_status, fill=cons_status), width=0.3, alpha=0.3) + facet_wrap(~BeeSpecies)+scale_fill_manual(values=c("#d7191c","#eec04b")) +
 labs(x="Conservation Status of Interacting Plant Species", y="Number of Pollen grains ")+theme_bw()
 
-library(MASS)
+#models to test the effect of conservation status and bee species on the number of pollen grains found on honey
 con<-glm.nb(PollenGrains~BeeSpecies*cons_status+offset(flowers_1km_radius), data=consStatus)
 con1<-glm.nb(PollenGrains~BeeSpecies+offset(flowers_1km_radius), data=consStatus)
 con2<-glm.nb(PollenGrains~cons_status+offset(flowers_1km_radius), data=consStatus)
@@ -91,15 +106,15 @@ MuMIn::model.sel(con, con1, con2, con3, con4, rank="AICc")
 anova(con1, test="Chi")
 summary(con1)
 
-library(emmeans)
-
 bee<-emmeans(con1, ~BeeSpecies)
 plot(confint(bee, level=0.95))
 
-library(RVAideMemoire)
 beenat<-back.emmeans(bee, transform = "logit", base = exp(1),add = 0,  decreasing = TRUE)
-ggplot()+
-  geom_errorbar(beenat, mapping=aes(x=beenat[,1], ymin=SE.inf, ymax=SE.sup), width=.2, size=0.5, color="black")+ geom_point(data=beenat, mapping=aes(x=beenat[,1], y=EMMean), size=2.5, shape=19, fill=c("black"), color="black")+theme_bw()+theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+#predicted values
+  ggplot()+
+  geom_errorbar(beenat, mapping=aes(x=beenat[,1], ymin=SE.inf, ymax=SE.sup), width=.2, size=0.5, color="black")+ 
+  geom_point(data=beenat, mapping=aes(x=beenat[,1], y=EMMean), size=2.5, shape=19, fill=c("black"), color="black")+theme_bw()+theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 ```
 
@@ -118,7 +133,7 @@ pheatmap(t(pollen_net), Rowv=NA, Colv=NA, col=colorRampPalette(c("#f5f5f5","#eec
 # NMDS
 
 ```{r NMDS analysis}
-Bees <-read.table("1.Data/Bees_PCA_test.csv",header=T, sep=",")
+Bees <-read.table("PollenNetwork/1.Data/Bees_PCA_test.csv",header=T, sep=",")
 
 data_matrix <- Bees[, 4:52]
 # Scale the data
@@ -144,13 +159,8 @@ nmds_points$Species <- Bees$Sp_code
 nmds_points$Species <-as.factor(nmds_points$Species)
 nmds_points$Hive <- Bees$Hive
 
-```
-
-```{r NMDS}
-
 # Convex hull function
 find_hull <- function(df) df[chull(df$MDS1, df$MDS2), ]
-
 
 # Apply convex hull function to each group
 hulls <- nmds_points |>
@@ -167,4 +177,60 @@ ggplot(data = nmds_points, aes(x = MDS1, y = MDS2)) +
   scale_colour_manual(labels= c("Nannotrigona testaceicornis",	"Paratrigona opacavalues", "Tetragonisca angustula"), values=c("Nann_test" = "#714925", "Para_opa"="#CF6B13","Tet_ang"= "#F69F22"))+
   labs(title = "NMDS Plot", x = "NMDS1", y = "NMDS2") +
   theme_bw()
+```
+Morisita Indexes
+
+```{r BETWEEN HIVES - MORISITA INDEXES}
+d1<-read.csv("PollenNetwork/1.Data/Between_hives.csv", dec = ".", sep = ";")
+
+#### ORDER DATABASE ####
+names(d1)
+dim(d1)
+d2<-d1[,(3:16)]
+names(d2)
+
+row.names(d2)<-as.character(d2$Sp_code)
+d2$Sp_code<-NULL
+d2
+ncol(d2)
+
+d3<-t(d2)
+d3
+
+# Calculate Morisita-Horn dissimilarity #
+library(vegan)
+morisita_horn_dissim <- vegdist(d3, method = "horn") 
+morisita_horn_dissim 
+
+# Calculate Morisita-Horn ssimilarity #
+hornsimilitud<-1-morisita_horn_dissim 
+hornsimilitud
+
+```
+
+```{r BETWEEN SPECIES - MORISITA INDEX}
+d1<-read.csv("PollenNetwork/1.Data/Between_bee_species.csv", dec = ".", sep = ";")
+d1
+
+names(d1)
+
+row.names(d1)<-as.character(d1$Sp_code)
+
+d1$Sp_code<-NULL
+d1
+ncol(d1)
+
+d2<-t(d1)
+d2
+
+# Calculate Morisita-Horn dissimilarity #
+library(vegan)
+morisita_horn_dissim <- vegdist(d2, method = "horn") 
+morisita_horn_dissim 
+
+
+# Calculate Morisita-Horn ssimilarity #
+hornsimilitud<-1-morisita_horn_dissim 
+hornsimilitud
+
 ```

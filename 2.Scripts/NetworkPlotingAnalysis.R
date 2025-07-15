@@ -3,7 +3,7 @@ library("tidyverse")
 library("igraph")
 
 #loading the matrix of interaction
-pollen_net <- read.csv("1.Data/Network_data.csv", header = T, sep="," , row.names = 1)
+pollen_net <- read.csv("PollenNetwork/1.Data/Network_data.csv", header = T, sep="," , row.names = 1)
 pollen_one_net <- as.one.mode(pollen_net)
 graph<-graph_from_biadjacency_matrix(pollen_net, weighted = T)
 E(graph)$weight#looking at the interactions
@@ -12,7 +12,7 @@ net_matrix<-as_adjacency_matrix(graph, sparse = FALSE)
 net_matrix[which(is.na(net_matrix) == T)]<-0
 
 #loading the data about the species
-net_info <- read_csv("1.Data/Species_data.csv")
+net_info <- read_csv("PollenNetwork/1.Data/Species_data.csv")
 
 # General metrics
 plants<-net_info|> filter(resource==1)|> nrow()
@@ -73,7 +73,7 @@ heatmap(t(pollen_net), Rowv=NA, Colv=NA, col=colorRampPalette(c("#f5f5f5","#80cd
 #############
 
 #network with the pooled data (hives combined)
-pool_net <- read.csv("1.Data/Network_pooled_data.csv", header = T, sep="," , row.names = 1)
+pool_net <- read.csv("PollenNetwork/1.Data/Network_pooled_data.csv", header = T, sep="," , row.names = 1)
 pool<-graph_from_biadjacency_matrix(pool_net, weighted = TRUE)
 E(pool)$weight
 length(V(pool)$name)
