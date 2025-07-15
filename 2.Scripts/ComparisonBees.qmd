@@ -5,7 +5,7 @@ format: html
 editor: visual
 ---
 
-## Analysis using pollen from honey of three rescued stingless bee species (Tetragonisca angustula, Nannotrigona testaceicornis, and Paratrigona opaca) in Bolivia's tropical Andes to  investigate foraging behavior and niche overlap in the context of plant-pollinator interactions network. 
+# Analysis using pollen from honey of three rescued stingless bee species (Tetragonisca angustula, Nannotrigona testaceicornis, and Paratrigona opaca) in Bolivia's tropical Andes to investigate foraging behavior and niche overlap in the context of plant-pollinator interactions network.
 
 ```{r import data and verify if there is a difference in the number of interactions for bee species}
 #loading all packages
@@ -178,6 +178,7 @@ ggplot(data = nmds_points, aes(x = MDS1, y = MDS2)) +
   labs(title = "NMDS Plot", x = "NMDS1", y = "NMDS2") +
   theme_bw()
 ```
+
 Morisita Indexes
 
 ```{r BETWEEN HIVES - MORISITA INDEXES}
